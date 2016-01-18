@@ -1,0 +1,10 @@
+.idea/*
+/target/
+*.iml
+nb-configuration.xml
+*.log.gz
+/overlays/
+/.settings/
+/bin/
+/.classpath
+/.project

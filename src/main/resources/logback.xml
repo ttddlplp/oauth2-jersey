@@ -1,0 +1,24 @@
+<configuration>
+    <appender name="rolling-file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${user.home}/logs/address-registry-test.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>address-registry-test%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>12</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%level [%date{ISO8601}][%mdc{RequestId}] %class{0} - %message%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%level [%date{ISO8601}][%mdc{requestId}] %class{0} %L - %message%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="rolling-file" />
+        <appender-ref ref="console" />
+    </root>
+</configuration>
