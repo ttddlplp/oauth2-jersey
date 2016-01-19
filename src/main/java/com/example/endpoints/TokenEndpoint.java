@@ -61,7 +61,6 @@ public class TokenEndpoint {
     @Produces("application/json")
     public Response authorize(@Context HttpServletRequest request, MultivaluedMap<String, String> form)
             throws OAuthSystemException {
-        System.out.println("Reach here");
         try {
             OAuthRequestWrapper requestWrapper = new OAuthRequestWrapper(request, form);
             AbstractOAuthTokenRequest oauthRequest;
@@ -70,20 +69,16 @@ public class TokenEndpoint {
             } else {
                 oauthRequest =
                         new OAuthTokenRequest(requestWrapper);
-
-                // check if client_secret is valid
                 if (!checkClientSecret(oauthRequest.getClientSecret())) {
                     return buildInvalidClientSecretResponse();
                 }
             }
             OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
 
-            // check if clientid is valid
             if (!checkClientId(oauthRequest.getClientId())) {
                 return buildInvalidClientIdResponse();
             }
 
-            // do checking for different grant types
             if (oauthRequest.getParam(OAuth.OAUTH_GRANT_TYPE).equals(GrantType.AUTHORIZATION_CODE.toString())) {
                 if (!checkAuthCode(oauthRequest.getParam(OAuth.OAUTH_CODE))) {
                     return buildBadAuthCodeResponse();
@@ -98,7 +93,6 @@ public class TokenEndpoint {
                 }
             } else if (oauthRequest.getParam(OAuth.OAUTH_GRANT_TYPE).equals(GrantType.REFRESH_TOKEN.toString())) {
                 // refresh token is not supported in this implementation
-
                 return buildInvalidUserPassResponse();
             }
             
@@ -111,7 +105,6 @@ public class TokenEndpoint {
                     .setExpiresIn("3600")
                     .buildJSONMessage();
             return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
-
         } catch (OAuthProblemException e) {
             OAuthResponse res = OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST).error(e)
                     .buildJSONMessage();
