@@ -26,7 +26,9 @@ import com.example.OAuthRequestWrapper;
 import org.apache.oltu.oauth2.as.issuer.MD5Generator;
 import org.apache.oltu.oauth2.as.issuer.OAuthIssuer;
 import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
+import org.apache.oltu.oauth2.as.request.AbstractOAuthTokenRequest;
 import org.apache.oltu.oauth2.as.request.OAuthTokenRequest;
+import org.apache.oltu.oauth2.as.request.OAuthUnauthenticatedTokenRequest;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
 import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.oltu.oauth2.common.error.OAuthError;
@@ -61,17 +63,24 @@ public class TokenEndpoint {
             throws OAuthSystemException {
         System.out.println("Reach here");
         try {
-            OAuthTokenRequest oauthRequest = new OAuthTokenRequest(new OAuthRequestWrapper(request, form));
+            OAuthRequestWrapper requestWrapper = new OAuthRequestWrapper(request, form);
+            AbstractOAuthTokenRequest oauthRequest;
+            if (requestWrapper.getParameter(OAuth.OAUTH_GRANT_TYPE).equals(GrantType.PASSWORD.toString())) {
+                oauthRequest = new OAuthUnauthenticatedTokenRequest(requestWrapper);
+            } else {
+                oauthRequest =
+                        new OAuthTokenRequest(requestWrapper);
+
+                // check if client_secret is valid
+                if (!checkClientSecret(oauthRequest.getClientSecret())) {
+                    return buildInvalidClientSecretResponse();
+                }
+            }
             OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
 
             // check if clientid is valid
             if (!checkClientId(oauthRequest.getClientId())) {
                 return buildInvalidClientIdResponse();
-            }
-
-            // check if client_secret is valid
-            if (!checkClientSecret(oauthRequest.getClientSecret())) {
-                return buildInvalidClientSecretResponse();
             }
 
             // do checking for different grant types
@@ -83,9 +92,14 @@ public class TokenEndpoint {
                 if (!checkUserPass(oauthRequest.getUsername(), oauthRequest.getPassword())) {
                     return buildInvalidUserPassResponse();
                 }
+            } else if (oauthRequest.getParam(OAuth.OAUTH_GRANT_TYPE).equals(GrantType.CLIENT_CREDENTIALS.toString())) {
+                if (!checkClientId(oauthRequest.getClientId()) || !checkClientSecret(oauthRequest.getClientSecret())) {
+                    return buildInvalidClientSecretResponse();
+                }
             } else if (oauthRequest.getParam(OAuth.OAUTH_GRANT_TYPE).equals(GrantType.REFRESH_TOKEN.toString())) {
                 // refresh token is not supported in this implementation
-                buildInvalidUserPassResponse();
+
+                return buildInvalidUserPassResponse();
             }
             
             final String accessToken = oauthIssuerImpl.accessToken();
@@ -117,7 +131,8 @@ public class TokenEndpoint {
     private Response buildInvalidClientSecretResponse() throws OAuthSystemException {
         OAuthResponse response =
                 OAuthASResponse.errorResponse(HttpServletResponse.SC_UNAUTHORIZED)
-                .setError(OAuthError.TokenResponse.UNAUTHORIZED_CLIENT).setErrorDescription(INVALID_CLIENT_DESCRIPTION)
+                .setError(OAuthError.TokenResponse.UNAUTHORIZED_CLIENT)
+                        .setErrorDescription(INVALID_CLIENT_DESCRIPTION)
                 .buildJSONMessage();
         return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
     }
@@ -141,11 +156,11 @@ public class TokenEndpoint {
     }
 
     private boolean checkClientId(String clientId) {
-        return true;
+        return Common.CLIENT_ID.equals(clientId);
     }
 
     private boolean checkClientSecret(String secret) {
-        return true;
+        return Common.CLIENT_SECRET.equals(secret);
     }
 
     private boolean checkAuthCode(String authCode) {

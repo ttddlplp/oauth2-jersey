@@ -34,10 +34,7 @@ import java.net.URL;
 
 import static org.junit.Assert.assertNotNull;
 
-/**
- *
- * @author jdlee
- */
+
 public class AuthIT {
 
     private URL url;
@@ -84,14 +81,41 @@ public class AuthIT {
     }
 
     @Test
-    public void directTokenRequest() throws Exception {
+    public void directTokenRequestWithPassword() throws Exception {
         OAuthClientRequest request = OAuthClientRequest
                 .tokenLocation(url.toString() + "token")
                 .setGrantType(GrantType.PASSWORD)
-                .setClientId(Common.CLIENT_ID)
-                .setClientSecret(Common.CLIENT_SECRET)
                 .setUsername(Common.USERNAME)
                 .setPassword(Common.PASSWORD)
+                .setClientId(Common.CLIENT_ID)
+                .buildBodyMessage();
+        OAuthClient oAuthClient = new OAuthClient(new URLConnectionClient());
+        OAuthAccessTokenResponse oauthResponse = oAuthClient.accessToken(request);
+        assertNotNull(oauthResponse.getAccessToken());
+        assertNotNull(oauthResponse.getExpiresIn());
+    }
+
+    @Test
+    public void directTokenRequestWithClientCredentials() throws Exception {
+        OAuthClientRequest request = OAuthClientRequest
+                .tokenLocation(url.toString() + "token")
+                .setGrantType(GrantType.CLIENT_CREDENTIALS)
+                .setClientId(Common.CLIENT_ID)
+                .setClientSecret(Common.CLIENT_SECRET)
+                .buildBodyMessage();
+        OAuthClient oAuthClient = new OAuthClient(new URLConnectionClient());
+        OAuthAccessTokenResponse oauthResponse = oAuthClient.accessToken(request);
+        assertNotNull(oauthResponse.getAccessToken());
+        assertNotNull(oauthResponse.getExpiresIn());
+    }
+
+    @Test(expected = Exception.class)
+    public void directTokenRequestWithClientCredentialsFailed() throws Exception {
+        OAuthClientRequest request = OAuthClientRequest
+                .tokenLocation(url.toString() + "token")
+                .setGrantType(GrantType.CLIENT_CREDENTIALS)
+                .setClientId("Random id")
+                .setClientSecret("random secret")
                 .buildBodyMessage();
         OAuthClient oAuthClient = new OAuthClient(new URLConnectionClient());
         OAuthAccessTokenResponse oauthResponse = oAuthClient.accessToken(request);
@@ -101,21 +125,21 @@ public class AuthIT {
 
     @Test
     public void endToEndWithAuthCode() throws Exception {
-            Response response = makeAuthCodeRequest();
-            Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        Response response = makeAuthCodeRequest();
+        Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 
-            String authCode = getAuthCode(response);
-            Assert.assertNotNull(authCode);
+        String authCode = getAuthCode(response);
+        Assert.assertNotNull(authCode);
 
-            OAuthAccessTokenResponse oauthResponse = makeTokenRequestWithAuthCode(authCode);
-            String accessToken = oauthResponse.getAccessToken();
+        OAuthAccessTokenResponse oauthResponse = makeTokenRequestWithAuthCode(authCode);
+        String accessToken = oauthResponse.getAccessToken();
 
-            URL restUrl = new URL(url.toString() + "resource");
-            WebTarget target = client.target(restUrl.toURI());
-            String entity = target.request(MediaType.TEXT_HTML)
-                    .header(Common.HEADER_AUTHORIZATION, "Bearer " + accessToken)
-                    .get(String.class);
-            System.out.println("Response = " + entity);
+        URL restUrl = new URL(url.toString() + "resource");
+        WebTarget target = client.target(restUrl.toURI());
+        String entity = target.request(MediaType.TEXT_HTML)
+                .header(Common.HEADER_AUTHORIZATION, "Bearer " + accessToken)
+                .get(String.class);
+        System.out.println("Response = " + entity);
     }
 
     void testValidTokenResponse(HttpURLConnection httpURLConnection) throws Exception {
