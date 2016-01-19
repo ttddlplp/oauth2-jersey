@@ -22,6 +22,7 @@ package com.example.endpoints;
 
 import com.example.Common;
 import com.example.Database;
+import com.example.OAuthRequestWrapper;
 import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
@@ -39,6 +40,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 /**
@@ -53,10 +55,12 @@ public class ResourceEndpoint {
 
     @GET
     @Produces("text/html")
-    public Response get(@Context HttpServletRequest request) throws OAuthSystemException {
+    public Response get(@Context HttpServletRequest request, MultivaluedMap<String, String> form)
+            throws OAuthSystemException {
         try {
             // Make the OAuth Request out of this request
-            OAuthAccessResourceRequest oauthRequest = new OAuthAccessResourceRequest(request, ParameterStyle.HEADER);
+            OAuthAccessResourceRequest oauthRequest = new OAuthAccessResourceRequest(
+                    new OAuthRequestWrapper(request, form), ParameterStyle.HEADER);
             // Get the access token
             String accessToken = oauthRequest.getAccessToken();
 

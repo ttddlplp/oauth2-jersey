@@ -5,6 +5,7 @@
 package com.example.endpoints;
 
 import com.example.Database;
+import com.example.OAuthRequestWrapper;
 import org.apache.oltu.oauth2.as.issuer.MD5Generator;
 import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
 import org.apache.oltu.oauth2.as.request.OAuthAuthzRequest;
@@ -23,6 +24,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,12 +39,11 @@ public class AuthzEndpoint {
     @Inject
     private Database database;
 
-    @Context HttpServletRequest request;
-
     @GET
-    public Response authorize() throws URISyntaxException, OAuthSystemException {
+    public Response authorize(@Context HttpServletRequest request, MultivaluedMap<String, String> form)
+            throws URISyntaxException, OAuthSystemException {
         try {
-            OAuthAuthzRequest oauthRequest = new OAuthAuthzRequest(request);
+            OAuthAuthzRequest oauthRequest = new OAuthAuthzRequest(new OAuthRequestWrapper(request, form));
             OAuthIssuerImpl oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
 
             //build response according to response_type

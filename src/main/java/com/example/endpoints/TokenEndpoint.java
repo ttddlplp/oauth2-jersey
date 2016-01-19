@@ -22,6 +22,7 @@ package com.example.endpoints;
 
 import com.example.Common;
 import com.example.Database;
+import com.example.OAuthRequestWrapper;
 import org.apache.oltu.oauth2.as.issuer.MD5Generator;
 import org.apache.oltu.oauth2.as.issuer.OAuthIssuer;
 import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
@@ -42,26 +43,25 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-/**
- *
- *
- *
- */
+
 @Path("/token")
 public class TokenEndpoint {
     @Inject
     private Database database;
     
     public static final String INVALID_CLIENT_DESCRIPTION = "Client authentication failed (e.g., unknown client, no client authentication included, or unsupported authentication method).";
-    
+
     @POST
     @Consumes("application/x-www-form-urlencoded")
     @Produces("application/json")
-    public Response authorize(@Context HttpServletRequest request) throws OAuthSystemException {
+    public Response authorize(@Context HttpServletRequest request, MultivaluedMap<String, String> form)
+            throws OAuthSystemException {
+        System.out.println("Reach here");
         try {
-            OAuthTokenRequest oauthRequest = new OAuthTokenRequest(request);
+            OAuthTokenRequest oauthRequest = new OAuthTokenRequest(new OAuthRequestWrapper(request, form));
             OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
 
             // check if clientid is valid
