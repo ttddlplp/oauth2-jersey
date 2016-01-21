@@ -15,6 +15,9 @@ public class TokenRequestProcessorFactoryTest {
 
     @Mock
     OAuthRequestWrapper requestWrapper;
+    
+    @Mock
+    Verifier verifier;
 
     @Before
     public void setUp() throws Exception {
@@ -24,30 +27,30 @@ public class TokenRequestProcessorFactoryTest {
     @Test
     public void createAuthCodeTokenProcessor() throws Exception {
         when(requestWrapper.getAuthType()).thenReturn(GrantType.AUTHORIZATION_CODE.toString());
-        assertTrue(factory.createTokenProcessor(requestWrapper) instanceof AuthCodeTokenProcessor);
+        assertTrue(factory.createTokenProcessor(requestWrapper, verifier) instanceof AuthCodeTokenProcessor);
     }
 
     @Test
     public void createClientCredentialTokenProcessor() throws Exception {
         when(requestWrapper.getAuthType()).thenReturn(GrantType.CLIENT_CREDENTIALS.toString());
-        assertTrue(factory.createTokenProcessor(requestWrapper) instanceof ClientCredentialTokenProcessor);
+        assertTrue(factory.createTokenProcessor(requestWrapper, verifier) instanceof ClientCredentialTokenProcessor);
     }
 
     @Test
     public void createPasswordTokenProcessor() throws Exception {
         when(requestWrapper.getAuthType()).thenReturn(GrantType.PASSWORD.toString());
-        assertTrue(factory.createTokenProcessor(requestWrapper) instanceof PasswordTokenRequestProcessor);
+        assertTrue(factory.createTokenProcessor(requestWrapper, verifier) instanceof PasswordTokenRequestProcessor);
     }
 
     @Test (expected = NotSupportedGrantTypException.class)
     public void supplyNotExistsGrantType() throws Exception {
         when(requestWrapper.getAuthType()).thenReturn("not exists type");
-        factory.createTokenProcessor(requestWrapper);
+        factory.createTokenProcessor(requestWrapper, verifier);
     }
 
     @Test (expected = NotSupportedGrantTypException.class)
     public void supplyGrantTypeWithNotAssociateProcessor() throws Exception {
         when(requestWrapper.getAuthType()).thenReturn(GrantType.REFRESH_TOKEN.toString());
-        factory.createTokenProcessor(requestWrapper);
+        factory.createTokenProcessor(requestWrapper, verifier);
     }
 }
