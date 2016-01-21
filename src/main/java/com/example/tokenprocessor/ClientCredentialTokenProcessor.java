@@ -36,7 +36,7 @@ public class ClientCredentialTokenProcessor implements TokenRequestProcessor {
         } catch (OAuthProblemException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Invalid request.").build();
         } catch (OAuthSystemException e) {
-            throw new RuntimeException(e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 }
