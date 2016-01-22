@@ -16,7 +16,7 @@ public class TokenRequestProcessorFactory {
             throw new NotSupportedGrantTypException();
         }
         switch (grantType) {
-            case AUTHORIZATION_CODE : return new AuthCodeTokenProcessor();
+            case AUTHORIZATION_CODE : return new AuthCodeTokenProcessor(verifier, generator);
             case CLIENT_CREDENTIALS : return new ClientCredentialTokenProcessor(verifier, generator);
             case PASSWORD : return new PasswordTokenRequestProcessor(verifier, generator);
             default : throw new NotSupportedGrantTypException();
