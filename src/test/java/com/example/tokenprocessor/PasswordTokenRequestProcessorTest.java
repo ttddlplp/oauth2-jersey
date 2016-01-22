@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 
 @PrepareForTest(OAuthASResponse.class)
 @RunWith(PowerMockRunner.class)
-public class ClientCredentialTokenProcessorTest {
+public class PasswordTokenRequestProcessorTest {
     private final static String TOKEN = "test-access-token";
     @Mock
     private OAuthRequestWrapper request;
@@ -35,36 +35,38 @@ public class ClientCredentialTokenProcessorTest {
     @Mock
     private AccessTokenGenerator generator;
 
-    private ClientCredentialTokenProcessor processor;
+    private PasswordTokenRequestProcessor processor;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(generator.createAccessToken()).thenReturn(TOKEN);
-        processor = new ClientCredentialTokenProcessor(verifier, generator);
+        processor = new PasswordTokenRequestProcessor(verifier, generator);
     }
 
     @Test
-    public void correctClientIdAndSecrect() throws Exception {
+    public void correctUsernameAndPassword() throws Exception {
         when(request.getParameter("client_id")).thenReturn(Common.CLIENT_ID);
-        when(request.getParameter("client_secret")).thenReturn(Common.CLIENT_SECRET);
-        when(request.getParameter("grant_type")).thenReturn(GrantType.CLIENT_CREDENTIALS.toString());
+        when(request.getParameter("username")).thenReturn(Common.USERNAME);
+        when(request.getParameter("password")).thenReturn(Common.PASSWORD);
+        when(request.getParameter("grant_type")).thenReturn(GrantType.PASSWORD.toString());
         when(request.getMethod()).thenReturn("POST");
         when(request.getContentType()).thenReturn("application/x-www-form-urlencoded");
-        when(verifier.checkClient(anyString(), anyString())).thenReturn(true);
+        when(verifier.checkUserPass(anyString(), anyString())).thenReturn(true);
         Response response = processor.process(request);
         assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
         assertThatJson(response.getEntity()).node("access_token").isPresent().isEqualTo(TOKEN);
     }
 
     @Test
-    public void incorrectClientIdAndSecrect() throws Exception {
+    public void incorrectUsernameAndPassword() throws Exception {
         when(request.getParameter("client_id")).thenReturn(Common.CLIENT_ID);
-        when(request.getParameter("client_secret")).thenReturn(Common.CLIENT_SECRET);
-        when(request.getParameter("grant_type")).thenReturn(GrantType.CLIENT_CREDENTIALS.toString());
+        when(request.getParameter("username")).thenReturn("wrong user");
+        when(request.getParameter("password")).thenReturn("wrong password");
+        when(request.getParameter("grant_type")).thenReturn(GrantType.PASSWORD.toString());
         when(request.getMethod()).thenReturn("POST");
         when(request.getContentType()).thenReturn("application/x-www-form-urlencoded");
-        when(verifier.checkClient(anyString(), anyString())).thenReturn(false);
+        when(verifier.checkUserPass(anyString(), anyString())).thenReturn(false);
         Response response = processor.process(request);
         assertThat(response.getStatus()).isEqualTo(Response.Status.UNAUTHORIZED.getStatusCode());
         assertThatJson(response.getEntity()).node("access_token").isAbsent();
@@ -73,8 +75,6 @@ public class ClientCredentialTokenProcessorTest {
     @Test
     public void badRequest() throws Exception {
         when(request.getParameter("client_id")).thenReturn(null);
-        when(request.getParameter("client_secret")).thenReturn(null);
-        when(request.getParameter("grant_type")).thenReturn(null);
         when(request.getMethod()).thenReturn(null);
         when(request.getContentType()).thenReturn("application/x-www-form-urlencoded");
         Response response = processor.process(request);
@@ -84,11 +84,12 @@ public class ClientCredentialTokenProcessorTest {
     @Test
     public void correctRequestWithOauthSystemException() throws Exception {
         when(request.getParameter("client_id")).thenReturn(Common.CLIENT_ID);
-        when(request.getParameter("client_secret")).thenReturn(Common.CLIENT_SECRET);
-        when(request.getParameter("grant_type")).thenReturn(GrantType.CLIENT_CREDENTIALS.toString());
+        when(request.getParameter("username")).thenReturn("wrong user");
+        when(request.getParameter("password")).thenReturn("wrong password");
+        when(request.getParameter("grant_type")).thenReturn(GrantType.PASSWORD.toString());
         when(request.getMethod()).thenReturn("POST");
         when(request.getContentType()).thenReturn("application/x-www-form-urlencoded");
-        when(verifier.checkClient(anyString(), anyString())).thenReturn(true);
+        when(verifier.checkUserPass(anyString(), anyString())).thenReturn(true);
         OAuthASResponse.OAuthTokenResponseBuilder mockBuilder =
                 mock(OAuthASResponse.OAuthTokenResponseBuilder.class);
         when(mockBuilder.setExpiresIn(anyString())).thenReturn(mockBuilder);

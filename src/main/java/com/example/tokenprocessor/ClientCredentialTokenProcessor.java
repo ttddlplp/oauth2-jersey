@@ -10,13 +10,14 @@ import org.apache.oltu.oauth2.common.message.OAuthResponse;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
-import java.util.UUID;
 
 public class ClientCredentialTokenProcessor implements TokenRequestProcessor {
     private final Verifier verifier;
+    private final AccessTokenGenerator accessTokenGenerator;
 
-    public ClientCredentialTokenProcessor(Verifier verifier) {
+    public ClientCredentialTokenProcessor(Verifier verifier, AccessTokenGenerator accessTokenGenerator) {
         this.verifier = verifier;
+        this.accessTokenGenerator = accessTokenGenerator;
     }
 
     @Override
@@ -27,7 +28,7 @@ public class ClientCredentialTokenProcessor implements TokenRequestProcessor {
                 OAuthResponse response = OAuthASResponse
                         .tokenResponse(HttpServletResponse.SC_OK)
                         .setExpiresIn("3600")
-                        .setAccessToken(UUID.randomUUID().toString())
+                        .setAccessToken(accessTokenGenerator.createAccessToken())
                         .buildJSONMessage();
                 return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
             } else {

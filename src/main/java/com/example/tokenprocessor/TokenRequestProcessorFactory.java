@@ -4,7 +4,10 @@ import com.example.OAuthRequestWrapper;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
 
 public class TokenRequestProcessorFactory {
-    public TokenRequestProcessor createTokenProcessor(OAuthRequestWrapper request, Verifier verifier)
+    public TokenRequestProcessor createTokenProcessor(
+            OAuthRequestWrapper request,
+            Verifier verifier,
+            AccessTokenGenerator generator)
             throws NotSupportedGrantTypException {
         GrantType grantType;
         try {
@@ -14,8 +17,8 @@ public class TokenRequestProcessorFactory {
         }
         switch (grantType) {
             case AUTHORIZATION_CODE : return new AuthCodeTokenProcessor();
-            case CLIENT_CREDENTIALS : return new ClientCredentialTokenProcessor(verifier);
-            case PASSWORD : return new PasswordTokenRequestProcessor();
+            case CLIENT_CREDENTIALS : return new ClientCredentialTokenProcessor(verifier, generator);
+            case PASSWORD : return new PasswordTokenRequestProcessor(verifier, generator);
             default : throw new NotSupportedGrantTypException();
         }
     }
