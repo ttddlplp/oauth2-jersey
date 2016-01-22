@@ -1,7 +1,9 @@
 package com.example.tokenprocessor;
 
+import java.util.UUID;
+
 public class AccessTokenGenerator {
     public String createAccessToken() {
-        return null;
+        return UUID.randomUUID().toString();
     }
 }

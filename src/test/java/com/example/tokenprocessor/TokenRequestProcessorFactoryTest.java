@@ -11,7 +11,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 public class TokenRequestProcessorFactoryTest {
-    TokenRequestProcessorFactory factory = new TokenRequestProcessorFactory();
 
     @Mock
     OAuthRequestWrapper requestWrapper;
@@ -21,17 +20,19 @@ public class TokenRequestProcessorFactoryTest {
     
     @Mock
     AccessTokenGenerator tokenGenerator;
+    private TokenRequestProcessorFactory factory;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        factory = new TokenRequestProcessorFactory(verifier, tokenGenerator);
     }
 
     @Test
     public void createAuthCodeTokenProcessor() throws Exception {
         when(requestWrapper.getAuthType()).thenReturn(GrantType.AUTHORIZATION_CODE.toString());
         assertTrue(
-                factory.createTokenProcessor(requestWrapper, verifier, tokenGenerator) instanceof AuthCodeTokenProcessor
+                factory.createTokenProcessor(requestWrapper) instanceof AuthCodeTokenProcessor
         );
     }
 
@@ -39,7 +40,7 @@ public class TokenRequestProcessorFactoryTest {
     public void createClientCredentialTokenProcessor() throws Exception {
         when(requestWrapper.getAuthType()).thenReturn(GrantType.CLIENT_CREDENTIALS.toString());
         assertTrue(
-                factory.createTokenProcessor(requestWrapper, verifier, tokenGenerator)
+                factory.createTokenProcessor(requestWrapper)
                         instanceof ClientCredentialTokenProcessor
         );
     }
@@ -48,7 +49,7 @@ public class TokenRequestProcessorFactoryTest {
     public void createPasswordTokenProcessor() throws Exception {
         when(requestWrapper.getAuthType()).thenReturn(GrantType.PASSWORD.toString());
         assertTrue(
-                factory.createTokenProcessor(requestWrapper, verifier, tokenGenerator)
+                factory.createTokenProcessor(requestWrapper)
                         instanceof PasswordTokenRequestProcessor
         );
     }
@@ -56,12 +57,12 @@ public class TokenRequestProcessorFactoryTest {
     @Test (expected = NotSupportedGrantTypException.class)
     public void supplyNotExistsGrantType() throws Exception {
         when(requestWrapper.getAuthType()).thenReturn("not exists type");
-        factory.createTokenProcessor(requestWrapper, verifier, tokenGenerator);
+        factory.createTokenProcessor(requestWrapper);
     }
 
     @Test (expected = NotSupportedGrantTypException.class)
     public void supplyGrantTypeWithNotAssociateProcessor() throws Exception {
         when(requestWrapper.getAuthType()).thenReturn(GrantType.REFRESH_TOKEN.toString());
-        factory.createTokenProcessor(requestWrapper, verifier, tokenGenerator);
+        factory.createTokenProcessor(requestWrapper);
     }
 }

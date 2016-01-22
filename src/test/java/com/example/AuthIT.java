@@ -1,6 +1,5 @@
 package com.example;
 
-import junit.framework.Assert;
 import org.apache.oltu.oauth2.client.OAuthClient;
 import org.apache.oltu.oauth2.client.URLConnectionClient;
 import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
@@ -32,6 +31,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 
@@ -61,20 +61,20 @@ public class AuthIT {
     @Test
     public void authorizationRequest() throws Exception {
         Response response = makeAuthCodeRequest();
-        Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
 
         String authCode = getAuthCode(response);
         System.out.println("authCode:" + authCode);
-        Assert.assertNotNull(authCode);
+        assertNotNull(authCode);
     }
 
     @Test
     public void authCodeTokenRequest() throws Exception {
         Response response = makeAuthCodeRequest();
-        Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
 
         String authCode = getAuthCode(response);
-        Assert.assertNotNull(authCode);
+        assertNotNull(authCode);
         OAuthAccessTokenResponse oauthResponse = makeTokenRequestWithAuthCode(authCode);
         assertNotNull(oauthResponse.getAccessToken());
         assertNotNull(oauthResponse.getExpiresIn());
@@ -126,10 +126,10 @@ public class AuthIT {
     @Test
     public void endToEndWithAuthCode() throws Exception {
         Response response = makeAuthCodeRequest();
-        Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
 
         String authCode = getAuthCode(response);
-        Assert.assertNotNull(authCode);
+        assertNotNull(authCode);
 
         OAuthAccessTokenResponse oauthResponse = makeTokenRequestWithAuthCode(authCode);
         String accessToken = oauthResponse.getAccessToken();
@@ -140,6 +140,19 @@ public class AuthIT {
                 .header(Common.HEADER_AUTHORIZATION, "Bearer " + accessToken)
                 .get(String.class);
         System.out.println("Response = " + entity);
+    }
+
+    @Test(expected = OAuthSystemException.class)
+    public void notSupportedGrantType() throws Exception {
+        OAuthClientRequest request = OAuthClientRequest
+                .tokenLocation(url.toString() + "token")
+                .setClientId(Common.CLIENT_ID)
+                .setClientSecret(Common.CLIENT_SECRET)
+                .setGrantType(GrantType.REFRESH_TOKEN)
+                .setCode(Common.AUTHORIZATION_CODE)
+                .buildBodyMessage();
+        OAuthClient oAuthClient = new OAuthClient(new URLConnectionClient());
+        OAuthAccessTokenResponse oauthResponse = oAuthClient.accessToken(request);
     }
 
     void testValidTokenResponse(HttpURLConnection httpURLConnection) throws Exception {

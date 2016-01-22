@@ -3,10 +3,12 @@ package com.example.tokenprocessor;
 import com.example.Common;
 import com.example.Database;
 
+import javax.inject.Inject;
+
 public class Verifier {
+    private final Database database;
 
-    private Database database;
-
+    @Inject
     public Verifier(Database database) {
         this.database = database;
     }

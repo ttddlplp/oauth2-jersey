@@ -72,7 +72,7 @@ public class ApplicationBase {
         if (resource == null) {
             throw new RuntimeException("Failed to get path to project");
         } else {
-            URL warUrl = new URL(resource, "../../target/oauth.war");
+            URL warUrl = new URL(resource, "../../target/oauth_ws.war");
             System.out.println("War file URL: " + warUrl.toString());
             return warUrl.getFile();
         }
