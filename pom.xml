@@ -238,6 +238,7 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <phase>install</phase>
                         <goals>
                             <goal>integration-test</goal>
                             <goal>verify</goal>

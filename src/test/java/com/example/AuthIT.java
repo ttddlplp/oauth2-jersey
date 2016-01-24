@@ -142,7 +142,7 @@ public class AuthIT {
         System.out.println("Response = " + entity);
     }
 
-    @Test(expected = OAuthSystemException.class)
+    @Test(expected = OAuthProblemException.class)
     public void notSupportedGrantType() throws Exception {
         OAuthClientRequest request = OAuthClientRequest
                 .tokenLocation(url.toString() + "token")

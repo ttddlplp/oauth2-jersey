@@ -1,6 +1,7 @@
 package com.example.tokenprocessor;
 
 import com.example.OAuthRequestWrapper;
+import com.example.token.AccessTokenGenerator;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
 
 import javax.inject.Inject;
@@ -19,7 +20,7 @@ public class TokenRequestProcessorFactory {
             throws NotSupportedGrantTypException {
         GrantType grantType;
         try {
-            grantType = GrantType.valueOf(request.getAuthType().toUpperCase());
+            grantType = GrantType.valueOf(request.getParameter("grant_type").toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new NotSupportedGrantTypException();
         }

@@ -1,4 +1,4 @@
-package com.example.tokenprocessor;
+package com.example.token;
 
 import java.util.UUID;
 

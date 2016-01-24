@@ -2,8 +2,8 @@ package com.example.tokenprocessor;
 
 import com.example.OAuthRequestWrapper;
 
-import javax.ws.rs.core.Response;
+import java.util.Optional;
 
 public interface TokenRequestProcessor {
-    Response process(OAuthRequestWrapper request);
+    Optional<String> process(OAuthRequestWrapper request) throws InvalidRequestException, ServerErrorException;
 }

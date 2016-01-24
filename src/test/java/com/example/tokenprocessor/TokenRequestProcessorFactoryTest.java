@@ -1,6 +1,7 @@
 package com.example.tokenprocessor;
 
 import com.example.OAuthRequestWrapper;
+import com.example.token.AccessTokenGenerator;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +31,7 @@ public class TokenRequestProcessorFactoryTest {
 
     @Test
     public void createAuthCodeTokenProcessor() throws Exception {
-        when(requestWrapper.getAuthType()).thenReturn(GrantType.AUTHORIZATION_CODE.toString());
+        when(requestWrapper.getParameter("grant_type")).thenReturn(GrantType.AUTHORIZATION_CODE.toString());
         assertTrue(
                 factory.createTokenProcessor(requestWrapper) instanceof AuthCodeTokenProcessor
         );
@@ -38,7 +39,7 @@ public class TokenRequestProcessorFactoryTest {
 
     @Test
     public void createClientCredentialTokenProcessor() throws Exception {
-        when(requestWrapper.getAuthType()).thenReturn(GrantType.CLIENT_CREDENTIALS.toString());
+        when(requestWrapper.getParameter("grant_type")).thenReturn(GrantType.CLIENT_CREDENTIALS.toString());
         assertTrue(
                 factory.createTokenProcessor(requestWrapper)
                         instanceof ClientCredentialTokenProcessor
@@ -47,7 +48,7 @@ public class TokenRequestProcessorFactoryTest {
 
     @Test
     public void createPasswordTokenProcessor() throws Exception {
-        when(requestWrapper.getAuthType()).thenReturn(GrantType.PASSWORD.toString());
+        when(requestWrapper.getParameter("grant_type")).thenReturn(GrantType.PASSWORD.toString());
         assertTrue(
                 factory.createTokenProcessor(requestWrapper)
                         instanceof PasswordTokenRequestProcessor
@@ -56,13 +57,13 @@ public class TokenRequestProcessorFactoryTest {
 
     @Test (expected = NotSupportedGrantTypException.class)
     public void supplyNotExistsGrantType() throws Exception {
-        when(requestWrapper.getAuthType()).thenReturn("not exists type");
+        when(requestWrapper.getParameter("grant_type")).thenReturn("not exists type");
         factory.createTokenProcessor(requestWrapper);
     }
 
     @Test (expected = NotSupportedGrantTypException.class)
     public void supplyGrantTypeWithNotAssociateProcessor() throws Exception {
-        when(requestWrapper.getAuthType()).thenReturn(GrantType.REFRESH_TOKEN.toString());
+        when(requestWrapper.getParameter("grant_type")).thenReturn(GrantType.REFRESH_TOKEN.toString());
         factory.createTokenProcessor(requestWrapper);
     }
 }

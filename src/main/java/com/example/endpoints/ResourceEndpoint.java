@@ -23,6 +23,7 @@ package com.example.endpoints;
 import com.example.Common;
 import com.example.Database;
 import com.example.OAuthRequestWrapper;
+import com.example.tokenprocessor.Verifier;
 import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
@@ -50,8 +51,14 @@ import javax.ws.rs.core.Response;
  */
 @Path("/resource")
 public class ResourceEndpoint {
+    private final Database database;
+    private final Verifier verifier;
+
     @Inject
-    private Database database;
+    public ResourceEndpoint(Database database, Verifier verifier) {
+        this.database = database;
+        this.verifier = verifier;
+    }
 
     @GET
     @Produces("text/html")

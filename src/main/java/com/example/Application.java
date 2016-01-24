@@ -4,7 +4,7 @@ import com.example.endpoints.AuthzEndpoint;
 import com.example.endpoints.RedirectEndpoint;
 import com.example.endpoints.ResourceEndpoint;
 import com.example.endpoints.TokenEndpoint;
-import com.example.tokenprocessor.AccessTokenGenerator;
+import com.example.token.AccessTokenGenerator;
 import com.example.tokenprocessor.TokenRequestProcessorFactory;
 import com.example.tokenprocessor.Verifier;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;

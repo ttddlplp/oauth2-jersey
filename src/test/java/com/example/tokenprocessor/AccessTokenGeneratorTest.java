@@ -1,5 +1,6 @@
 package com.example.tokenprocessor;
 
+import com.example.token.AccessTokenGenerator;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
