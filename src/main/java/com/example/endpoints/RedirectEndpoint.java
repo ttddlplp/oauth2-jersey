@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.example.endpoints;
 
 import org.codehaus.jettison.json.JSONException;
@@ -17,10 +13,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author jdlee
- */
 @Path("/redirect")
 public class RedirectEndpoint {
 

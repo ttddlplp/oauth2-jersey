@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.example.endpoints;
 
 import com.example.Database;
@@ -29,10 +25,6 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-/**
- *
- * @author jdlee
- */
 @Path("/authz")
 public class AuthzEndpoint {
 
