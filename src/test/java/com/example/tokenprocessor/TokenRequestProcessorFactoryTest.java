@@ -2,6 +2,7 @@ package com.example.tokenprocessor;
 
 import com.example.OAuthRequestWrapper;
 import com.example.token.AccessTokenGenerator;
+import com.example.token.TokenDao;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +19,9 @@ public class TokenRequestProcessorFactoryTest {
     
     @Mock
     Verifier verifier;
+
+    @Mock
+    TokenDao tokenDao;
     
     @Mock
     AccessTokenGenerator tokenGenerator;
@@ -26,7 +30,7 @@ public class TokenRequestProcessorFactoryTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        factory = new TokenRequestProcessorFactory(verifier, tokenGenerator);
+        factory = new TokenRequestProcessorFactory(verifier, tokenGenerator, tokenDao);
     }
 
     @Test

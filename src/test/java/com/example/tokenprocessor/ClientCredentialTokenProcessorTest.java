@@ -2,7 +2,9 @@ package com.example.tokenprocessor;
 
 import com.example.Common;
 import com.example.OAuthRequestWrapper;
+import com.example.token.AccessTokenData;
 import com.example.token.AccessTokenGenerator;
+import com.example.token.TokenDao;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
@@ -21,7 +23,10 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @PrepareForTest(OAuthASResponse.class)
@@ -37,13 +42,17 @@ public class ClientCredentialTokenProcessorTest {
     @Mock
     private AccessTokenGenerator generator;
 
+    @Mock
+    private TokenDao tokenDao;
+
+
     private ClientCredentialTokenProcessor processor;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(generator.createAccessToken()).thenReturn(TOKEN);
-        processor = new ClientCredentialTokenProcessor(verifier, generator);
+        processor = new ClientCredentialTokenProcessor(verifier, generator, tokenDao);
     }
 
     @Test
@@ -98,5 +107,20 @@ public class ClientCredentialTokenProcessorTest {
         when(OAuthASResponse.tokenResponse(Response.Status.OK.getStatusCode())).thenReturn(mockBuilder);
 
         processor.process(request);
+    }
+
+    @Test
+    public void saveTokenData() throws Exception {
+        when(request.getParameter("client_id")).thenReturn(Common.CLIENT_ID);
+        when(request.getParameter("client_secret")).thenReturn(Common.CLIENT_SECRET);
+        when(request.getParameter("grant_type")).thenReturn(GrantType.CLIENT_CREDENTIALS.toString());
+        when(request.getMethod()).thenReturn("POST");
+        when(request.getContentType()).thenReturn("application/x-www-form-urlencoded");
+        when(verifier.checkClient(anyString(), anyString())).thenReturn(true);
+        when(generator.createAccessToken()).thenReturn(TOKEN);
+
+        processor.process(request);
+        AccessTokenData accessTokenData = new AccessTokenData().withClientId(Common.CLIENT_ID);
+        verify(tokenDao, times(1)).save(eq(TOKEN), eq(accessTokenData));
     }
 }

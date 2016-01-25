@@ -2,7 +2,9 @@ package com.example.tokenprocessor;
 
 import com.example.Common;
 import com.example.OAuthRequestWrapper;
+import com.example.token.AccessTokenData;
 import com.example.token.AccessTokenGenerator;
+import com.example.token.TokenDao;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
@@ -21,7 +23,10 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @PrepareForTest(OAuthASResponse.class)
@@ -35,6 +40,9 @@ public class PasswordTokenRequestProcessorTest {
     private Verifier verifier;
 
     @Mock
+    private TokenDao tokenDao;
+
+    @Mock
     private AccessTokenGenerator generator;
 
     private PasswordTokenRequestProcessor processor;
@@ -43,7 +51,7 @@ public class PasswordTokenRequestProcessorTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(generator.createAccessToken()).thenReturn(TOKEN);
-        processor = new PasswordTokenRequestProcessor(verifier, generator);
+        processor = new PasswordTokenRequestProcessor(verifier, generator, tokenDao);
     }
 
     @Test
@@ -99,5 +107,21 @@ public class PasswordTokenRequestProcessorTest {
         when(OAuthASResponse.tokenResponse(Response.Status.OK.getStatusCode())).thenReturn(mockBuilder);
 
         processor.process(request);
+    }
+
+    @Test
+    public void saveTokenData() throws Exception {
+        when(request.getParameter("client_id")).thenReturn(Common.CLIENT_ID);
+        when(request.getParameter("username")).thenReturn(Common.USERNAME);
+        when(request.getParameter("password")).thenReturn(Common.PASSWORD);
+        when(request.getParameter("grant_type")).thenReturn(GrantType.PASSWORD.toString());
+        when(request.getMethod()).thenReturn("POST");
+        when(request.getContentType()).thenReturn("application/x-www-form-urlencoded");
+        when(verifier.checkUserPass(anyString(), anyString())).thenReturn(true);
+        when(generator.createAccessToken()).thenReturn(TOKEN);
+
+        processor.process(request);
+        AccessTokenData accessTokenData = new AccessTokenData().withUserId(Common.USERNAME);
+        verify(tokenDao, times(1)).save(eq(TOKEN), eq(accessTokenData));
     }
 }

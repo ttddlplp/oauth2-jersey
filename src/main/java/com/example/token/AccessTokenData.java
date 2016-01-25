@@ -1,5 +1,6 @@
 package com.example.token;
 
+import java.util.Objects;
 import java.util.Set;
 
 public class AccessTokenData {
@@ -29,5 +30,35 @@ public class AccessTokenData {
 
     public void setRoles(Set<String> roles) {
         this.roles = roles;
+    }
+
+    public AccessTokenData withClientId(String clientId) {
+        this.clientId = clientId;
+        return this;
+    }
+
+    public AccessTokenData withUserId(String userId) {
+        this.userId = userId;
+        return this;
+    }
+
+    public AccessTokenData withRoles(Set<String> roles) {
+        this.roles = roles;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+        AccessTokenData that = (AccessTokenData) o;
+        return Objects.equals(clientId, that.clientId) &&
+                Objects.equals(userId, that.userId) &&
+                Objects.equals(roles, that.roles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(clientId, userId, roles);
     }
 }
